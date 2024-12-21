@@ -4,13 +4,11 @@ import threading
 
 # Configuration
 CAN_INTERFACE = 'can0'  # Change to your CAN interface
-BUS_TYPE = 'socketcan'   # Change based on your platform (e.g., 'socketcan', 'pcan', 'kvaser')
+BUS_TYPE = 'socketcan'   # Adjust based on your platform
 BITRATE = 500000         # CAN bus bitrate
-
-# Detection Configuration
-SPOOFED_IDS = {0x00F, 0x200}  # Example set of IDs to monitor for spoofing
-DETECTION_THRESHOLD = 1       # Number of times an ID is seen within the interval to be considered spoofed
-DETECTION_INTERVAL = 2        # Time interval in seconds for counting messages
+SPOOFED_IDS = {0x00F, 0x200}  # Spoofed IDs to monitor
+DETECTION_THRESHOLD = 1       # Threshold for detection
+DETECTION_INTERVAL = 2        # Time interval for counting messages
 
 class SpoofingDetector:
     def __init__(self):
@@ -35,21 +33,49 @@ class SpoofingDetector:
                 return True
         return False
 
-def send_defensive_message(bus, message):
-    # Create defensive message with same ID and DLC, data field all zeros
+def send_defensive_message(bus, arbitration_id, dlc, is_extended_id):
+    # Create defensive message
     defensive_message = can.Message(
-        arbitration_id=message.arbitration_id,
-        data=[0x00] * message.dlc,
-        is_extended_id=message.is_extended_id
+        arbitration_id=arbitration_id,
+        data=[0x00] * dlc,
+        is_extended_id=is_extended_id
     )
     try:
         bus.send(defensive_message)
-        print(f"Sent defensive message: ID={hex(defensive_message.arbitration_id)} Data={defensive_message.data.hex()}")
+        print(f"Sent defensive message: ID={hex(defensive_message.arbitration_id)}")
     except can.CanError as e:
         print(f"Error sending defensive message: {e}")
 
+def execute_defense(bus, spoofed_message):
+    # Parrot defense logic
+    collisions_detected = 0
+
+    # Phase 1: Cause 16 collisions to push attacker into error-passive state
+    while collisions_detected < 16:
+        send_defensive_message(
+            bus,
+            spoofed_message.arbitration_id,
+            spoofed_message.dlc,
+            spoofed_message.is_extended_id
+        )
+        time.sleep(0.00032)  # 320 µs delay
+        collisions_detected += 1
+
+    print("Collision phase completed. Attacker in error-passive state.")
+
+    # Phase 2: Send 15 more defensive messages to push attacker into bus-off
+    for _ in range(15):
+        send_defensive_message(
+            bus,
+            spoofed_message.arbitration_id,
+            spoofed_message.dlc,
+            spoofed_message.is_extended_id
+        )
+        time.sleep(0.00032)  # 320 µs delay
+
+    print("Bus-off phase completed. Attacker neutralized.")
+
 def main():
-    # Initialize CAN bus
     try:
         bus = can.Bus(interface=BUS_TYPE, channel=CAN_INTERFACE, bitrate=BITRATE)
     except Exception as e:
@@ -65,14 +91,11 @@ def main():
         while True:
             message = listener.get_message(timeout=1.0)
             if message is not None:
-                print(f"Received message: ID={hex(message.arbitration_id)} Data={message.data.hex()}")
+                print(f"Received message: ID={hex(message.arbitration_id)}")
                 if detector.is_spoofed(message):
                     print(f"Spoofed message detected: ID={hex(message.arbitration_id)}")
-                    for i in range(0,33):
-                        send_defensive_message(bus, message)
-                        time.sleep(0.00032)
+                    execute_defense(bus, message)
             else:
-                # No message received
                 continue
     except KeyboardInterrupt:
         print("Shutting down.")
