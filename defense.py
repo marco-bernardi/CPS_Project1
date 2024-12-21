@@ -32,10 +32,7 @@ class SpoofingDetector:
             count = self.message_counts.get(message.arbitration_id, 0) + 1
             self.message_counts[message.arbitration_id] = count
             if count > DETECTION_THRESHOLD and message.arbitration_id in SPOOFED_IDS:
-                print("SPOOFED!")
                 return True
-            else: 
-                print("NOT SPOOFED!")
         return False
 
 def send_defensive_message(bus, message):
