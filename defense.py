@@ -8,7 +8,7 @@ BUS_TYPE = 'socketcan'   # Adjust based on your platform
 BITRATE = 500000         # CAN bus bitrate
 SPOOFED_IDS = {0x00F, 0x200}  # Spoofed IDs to monitor
 DETECTION_THRESHOLD = 1       # Threshold for detection
-DETECTION_INTERVAL = 2        # Time interval for counting messages
+DETECTION_INTERVAL = 1        # Time interval for counting messages
 
 class SpoofingDetector:
     def __init__(self):
