@@ -58,7 +58,7 @@ def execute_defense(bus, spoofed_message):
             spoofed_message.dlc,
             spoofed_message.is_extended_id
         )
-        time.sleep(0.00032)  # 320 µs delay
+        time.sleep(0.00030)  # 320 µs delay
         collisions_detected += 1
 
     print("Collision phase completed. Attacker in error-passive state.")
