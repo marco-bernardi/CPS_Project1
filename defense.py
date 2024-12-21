@@ -3,7 +3,7 @@ import time
 import threading
 
 # Configuration
-CAN_INTERFACE = 'vcan0'  # Change to your CAN interface
+CAN_INTERFACE = 'can0'  # Change to your CAN interface
 BUS_TYPE = 'socketcan'   # Change based on your platform (e.g., 'socketcan', 'pcan', 'kvaser')
 BITRATE = 500000         # CAN bus bitrate
 
