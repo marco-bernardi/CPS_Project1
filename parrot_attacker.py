@@ -4,7 +4,7 @@ import time
 # Configuration
 CAN_INTERFACE = 'can0'
 SPOOFED_ID = 0x00F  # The ID the attacker is spoofing
-SPOOFED_DATA = [0xFF] * 8  # Spoofed message data (example: all 0xFF)
+SPOOFED_DATA = [0x00] * 8  # Spoofed message data (example: all 0xFF)
 
 # Initialize CAN bus
 bus = can.interface.Bus(channel=CAN_INTERFACE, bustype='socketcan')
