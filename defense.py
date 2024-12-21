@@ -70,6 +70,7 @@ def main():
                     print(f"Spoofed message detected: ID={hex(message.arbitration_id)}")
                     for i in range(0,33):
                         send_defensive_message(bus, message)
+                        time.sleep(0.00032)
             else:
                 # No message received
                 continue
