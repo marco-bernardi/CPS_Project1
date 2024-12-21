@@ -68,7 +68,7 @@ def main():
                 print(f"Received message: ID={hex(message.arbitration_id)} Data={message.data.hex()}")
                 if detector.is_spoofed(message):
                     print(f"Spoofed message detected: ID={hex(message.arbitration_id)}")
-                    for i in range(0,11):
+                    for i in range(0,33):
                         send_defensive_message(bus, message)
             else:
                 # No message received
