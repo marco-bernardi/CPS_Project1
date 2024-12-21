@@ -25,7 +25,7 @@ if __name__ == "__main__":
         print("Attacker simulation started")
         while True:
             send_spoofed_message()
-            time.sleep(1)  # Send a spoofed message every 500ms (adjust as needed)
+            time.sleep(0.1)  # Send a spoofed message every 500ms (adjust as needed)
     except KeyboardInterrupt:
         print("Exiting attacker simulation...")
         bus.shutdown()
