@@ -51,14 +51,14 @@ def execute_defense(bus, spoofed_message):
     collisions_detected = 0
 
     # Phase 1: Cause 16 collisions to push attacker into error-passive state
-    while collisions_detected < 16:
+    while collisions_detected < 33:
         send_defensive_message(
             bus,
             spoofed_message.arbitration_id,
             spoofed_message.dlc,
             spoofed_message.is_extended_id
         )
-        time.sleep(0.00030)  # 320 µs delay
+        time.sleep(0.00005)  # 320 µs delay
         collisions_detected += 1
 
     print("Collision phase completed. Attacker in error-passive state.")
@@ -71,7 +71,7 @@ def execute_defense(bus, spoofed_message):
             spoofed_message.dlc,
             spoofed_message.is_extended_id
         )
-        time.sleep(0.00032)  # 320 µs delay
+        time.sleep(0.00005)  # 320 µs delay
 
     print("Bus-off phase completed. Attacker neutralized.")
 
