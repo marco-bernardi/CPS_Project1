@@ -9,8 +9,8 @@ BITRATE = 500000         # CAN bus bitrate
 
 # Detection Configuration
 SPOOFED_IDS = {0x00F, 0x200}  # Example set of IDs to monitor for spoofing
-DETECTION_THRESHOLD = 5       # Number of times an ID is seen within the interval to be considered spoofed
-DETECTION_INTERVAL = 1        # Time interval in seconds for counting messages
+DETECTION_THRESHOLD = 1       # Number of times an ID is seen within the interval to be considered spoofed
+DETECTION_INTERVAL = 2        # Time interval in seconds for counting messages
 
 class SpoofingDetector:
     def __init__(self):
@@ -32,7 +32,10 @@ class SpoofingDetector:
             count = self.message_counts.get(message.arbitration_id, 0) + 1
             self.message_counts[message.arbitration_id] = count
             if count > DETECTION_THRESHOLD and message.arbitration_id in SPOOFED_IDS:
+                print("SPOOFED!")
                 return True
+            else: 
+                print("NOT SPOOFED!")
         return False
 
 def send_defensive_message(bus, message):
