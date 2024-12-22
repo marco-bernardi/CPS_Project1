@@ -31,7 +31,7 @@ def parrot_defense():
             if msg.arbitration_id in MY_IDS and msg.data != DMESSAGE_DATA:
                 print(f"Detected spoofed message with ID: {hex(msg.arbitration_id)}")
                 # Send defensive messages at maximum speed
-                for _ in range(32):
+                for _ in range(2):
                     send_defensive_message(msg.arbitration_id)
                 print(f"Counter-attack launched for ID: {hex(msg.arbitration_id)}")
 
