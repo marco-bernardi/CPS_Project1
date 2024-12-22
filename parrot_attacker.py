@@ -5,9 +5,10 @@ import random  # Import the random module
 # Configuration
 CAN_INTERFACE = 'can0'
 SPOOFED_ID = 0x00F  # The ID the attacker is spoofing
+BUS_TYPE = 'socketcan'   # Adjust based on your platform
 
 # Initialize CAN bus
-bus = can.interface.Bus(channel=CAN_INTERFACE, bitrate=400000)
+bus = can.interface.Bus(interface=BUS_TYPE, channel=CAN_INTERFACE, bitrate=400000)
 
 def send_spoofed_message():
     """Send a spoofed CAN message with random data."""
