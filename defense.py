@@ -64,7 +64,7 @@ def execute_defense(bus, spoofed_message):
     print("Collision phase completed. Attacker in error-passive state.")
 
     # Phase 2: Send 15 more defensive messages to push attacker into bus-off
-    for _ in range(30):
+    for _ in range(53):
         send_defensive_message(
             bus,
             spoofed_message.arbitration_id,
