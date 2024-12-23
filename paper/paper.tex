@@ -135,40 +135,38 @@ The CAN protocol operates with a bitwise arbitration mechanism, where messages a
 
 \subsection{Experiment Setup and Expectations}
 
-The spoofed message was sent by the attacker at a rate of 1 second, and the target ECU was configured to listen for messages with its ID. According to the scope measurements, the ECU takes 0.210 ms to transmit the entire message. 
+The spoofed message was sent by the attacker at a rate of 1 second, and the target ECU was configured to listen for messages with its ID. 
+According to the scope measurements, the ECU takes 0.210 ms to transmit the entire message and 0.180 ms to start the next one.
+Theoretically after the first spoofed message, the defender should send $1000/(0.210 + 0.180) = 2564$ messages to reach the start of the next spoofed message.
+The 2565th message should trigger the first step of the defense mechanism, forcing the attacker into a bus-off state.
+By testing this approach, the authors noticed that the CAN controller wasn't able to transmit all 2565 messages in the expected time. After sending half of the messages by code, the CAN controller buffer
+was full, resulting in some messages being lost.[\ref{fig:lost_messages} - \ref{fig:scope}]
+These lost messages introduce a consistent amount of blank spots, allowing the attacker to send the next spoofed message without being disarmed.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{buffer_full.png}
+    \caption{Buffer error on the software side}
+    \label{fig:lost_messages}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{scope.png}
+    \caption{Holes on the CAN bus signal due to buffer error}
+    \label{fig:scope}
+\end{figure}
 
-\begin{itemize}
-    \item As a result, once the target ECU receives the spoofed message, it must send five 0x00 messages in order to wait for the next spoofed message.
-    \item The sixth message is expected to trigger the first step of the defense mechanism, which forces the attacker into a bus-off state.
-\end{itemize}
+As a second attempt, the attacker rate was reduced to 0.25 seconds, in that way the defender should send only $250/(0.210 + 0.180) = 641$ messages to reach the start of the next spoofed message.
+The 642th message should trigger the first step of the defense mechanism, forcing the attacker into a bus-off state without overloading the CAN controller buffer.
+The experiment was unsuccessful, as we were still getting the same buffer error as before.
 
-However, the outcome showed that the attacker was still able to send spoofed messages, indicating that the defense mechanism was not properly synchronized with the attacker’s message rate.
-
-\subsection{Troubleshooting and Adjustments}
-
-To improve synchronization, the attacker’s message rate was adjusted to 1.05 seconds, considering that the ECU takes 0.210 ms to transmit a message. The intention was to better align the transmission timing between the attacker’s messages and the defense mechanism. However, the outcome remained the same, suggesting that there was some other delay in the system not accounted for.
-
-\subsection{CAN Controller Throughput Measurement}
-
-To debug the issue, the throughput of the CAN controller was measured, and it was found that the controller introduces a gap of 0.180 ms between the end of one message and the start of the next one. This gap was not initially considered in the defense mechanism. 
-
-\begin{itemize}
-    \item \textbf{Theoretical Adjustment}: By adding this gap to the time taken for message transmission, we should achieve perfect synchronization between the attacker and the defense mechanism.
-\end{itemize}
-
-\subsection{Final Outcome}
-
-The author attempted to synchronize the system by incorporating the 0.180 ms gap, but despite this adjustment, the attacker was still able to send spoofed messages.
-
-\begin{itemize}
-    \item \textbf{Reason for Failure}: This issue arises because the 0.180 ms gap is too large, allowing the attacker to start the arbitration before the defense mechanism can react, resulting in a failure to synchronize the two systems.
-\end{itemize}
 
 \section{Conclusion}
 
 The experiment demonstrated the challenges of implementing the Parrot system on low-end, cost-effective devices.
-The according to the MCP2515 datasheet, the CAN controller should be able to transmit messages up to 1 Mbps, but in the experiment, the actual bitrate was 
-500 Kbps. This discrepancy arise from the fact that the boughted CAN shields was using a 8 MHz crystal-oscillator instead of the 16 MHz one.
+According to the MCP2515 datasheet, the CAN controller should be able to transmit messages up to 1~Mbps, but in the experiment, the actual bitrate was limited to 
+500~Kbps. This discrepancy arose from the fact that the purchased CAN shields used an 8~MHz crystal oscillator instead of the specified 16~MHz one.
+Without the ability to transmit messages at a very high rate, the Parrot system cannot disarm the attacker, making it ineffective in a real-world scenario.
+The authors of the original paper stated that the CAN controller should be able to send one message every 31~$\mu$s to effectively disarm the attacker, but in the experiment, the actual rate achieved was one message every 390~$\mu$s.
 
 
 
