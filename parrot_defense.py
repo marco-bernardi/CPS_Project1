@@ -15,8 +15,8 @@ def send_defensive_message(message_id):
     try:
         bus.send(msg)
         print(f"Sent defensive message with ID: {hex(message_id)}")
-    except can.CanError:
-        print("Failed to send defensive message")
+    except can.CanError as e:
+        print(f"Failed to send defensive message. Error: {e}")
 
 def parrot_defense():
     """Parrot defense mechanism."""
@@ -31,9 +31,8 @@ def parrot_defense():
             if msg.arbitration_id in MY_IDS and msg.data != DMESSAGE_DATA:
                 print(f"Detected spoofed message with ID: {hex(msg.arbitration_id)}")
                 # Send defensive messages at maximum speed
-                for _ in range(2):
+                for _ in range(3650):
                     send_defensive_message(msg.arbitration_id)
-                print(f"Counter-attack launched for ID: {hex(msg.arbitration_id)}")
 
 if __name__ == "__main__":
     try:
